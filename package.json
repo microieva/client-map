@@ -15,9 +15,11 @@
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
     "@mui/system": "^7.3.8",
+    "@types/react-router-dom": "^5.3.3",
     "axios": "^1.13.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^7.13.1",
     "react-simple-maps": "^3.0.0"
   },
   "devDependencies": {

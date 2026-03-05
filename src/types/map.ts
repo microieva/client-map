@@ -29,6 +29,7 @@ export interface MapConfig {
 export interface HoveredCountry {
   name: string;
   position: { x: number; y: number };
+  numberOfArticles?: number
 }
 
 export interface MapInteractions {

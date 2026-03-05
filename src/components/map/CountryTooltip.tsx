@@ -3,9 +3,10 @@ import React from 'react';
 interface CountryTooltipProps {
   countryName: string;
   position: { x: number; y: number };
+  numberOfArticles?: number;
 }
 
-const CountryTooltip: React.FC<CountryTooltipProps> = ({ countryName, position }) => {
+const CountryTooltip: React.FC<CountryTooltipProps> = ({ countryName, position, numberOfArticles }) => {
   return (
     <div
       style={{
@@ -23,9 +24,10 @@ const CountryTooltip: React.FC<CountryTooltipProps> = ({ countryName, position }
         zIndex: 1000,
         transition: 'opacity 0.2s ease',
         border: '1px solid #e0e0e0',
+        wordBreak:'keep-all'
       }}
     >
-      {countryName}
+      {countryName} {numberOfArticles && <strong>{numberOfArticles} mentions</strong>}
       <div
         style={{
           position: 'absolute',

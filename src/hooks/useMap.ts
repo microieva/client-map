@@ -8,12 +8,14 @@ export const useMap = () => {
 
   const handleCountryHover = useCallback((
     countryName: string | null, 
+    numberOfArticlesPerCountry: number | undefined,
     event?: React.MouseEvent
   ) => {
     if (countryName && event) {
       setHoveredCountry({
         name: countryName,
-        position: { x: event.clientX, y: event.clientY }
+        position: { x: event.clientX, y: event.clientY },
+        numberOfArticles: numberOfArticlesPerCountry || undefined
       });
       setTooltipPosition({ x: event.clientX, y: event.clientY });
     } else {
@@ -23,11 +25,10 @@ export const useMap = () => {
 
   const handleCountryClick = useCallback((
     countryName: string,
-    geography: CountryGeography
+    //geography: CountryGeography
   ) => {
     setSelectedCountry(countryName);
-    console.log('Country selected:', countryName, geography);
-    // You can add more logic here (navigation, data fetching, etc.)
+
   }, []);
 
   const handleCountryLeave = useCallback(() => {
