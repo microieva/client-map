@@ -1,63 +1,73 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCountries } from '../hooks/useCountries';
-import { WORLD_MAP_URL } from '../constants/map';
-import { Typography } from '@mui/material';
+import { Backdrop, Box, CircularProgress, Container } from '@mui/material';
+import { useApi } from '../context/ApiContext';
+import { ArticleData } from '../types/api';
+import {Articles, Header, PageHeader } from '../components/layout';
+import { useApp } from '../context/AppContext';
 
-const CountryPage: React.FC = () => {
+const CountryPage = ({ids}:{ids?:string[]}) => {
+
   const { countryName } = useParams<{ countryName: string }>();
+  const {getArticles, articles} = useApi();
+  const [filteredArticles, setFilteredArticles] = useState<ArticleData[] | null>(null);
+  const {selectedTopic} = useApp();
   const navigate = useNavigate();
-  const { countries, loading: countriesLoading } = useCountries(WORLD_MAP_URL);
-  
-  const [originalCountryName, setOriginalCountryName] = useState<string>('');
-  const [countryData, setCountryData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!countries || countriesLoading) return;
-    const found = countries.find(
-      c => c.toLowerCase().replace(/\s+/g, '-') === countryName
-    );
-
-    if (found) {
-      setOriginalCountryName(found);
-      fetchArticles(found);
-    } else {
+    if (!countryName) {
       navigate('/404', { replace: true });
-    }
-  }, [countryName, countries, countriesLoading]);
-
-  const fetchArticles = async (country: string) => {
-    try {
+    } else {
       setLoading(true);
-      // const response = await fetch(`/countries/${encodeURIComponent(country)}`);
-      // const data = await response.json();
-      setCountryData(country);
-    } catch (error) {
-      console.error('Error fetching country data:', error);
-    } finally {
+      ids && getArticles(ids); 
       setLoading(false);
     }
-  };
+  }, [ids]);
 
-  if (countriesLoading || loading) {
-    return <div className="loading">Loading...</div>;
+  useEffect(() => {
+    if (selectedTopic) {
+      const filtered = articles.filter((article: ArticleData) => {
+        return article.topic?.name === selectedTopic;
+      });
+      setFilteredArticles(filtered);
+    } else {
+      setFilteredArticles(articles);
+    }
+  }, [selectedTopic, articles]);
+  
+  const onClick = (article:ArticleData) => {
+    navigate(`/article/${article.id}`)
   }
+
+ 
 
   return (
     <div className="country-page">
-      <button onClick={() => navigate('/')} className="back-button">
-        ← Back to Map
-      </button>
-      
-      <h1>{originalCountryName}</h1>
-      
-      <div className="country-content">
-        COUNTRY CONTENT
-        {countryData && (
-          <Typography component="h4">{countryData}</Typography>
-        )}
-      </div>
+      <Backdrop
+        sx={{
+          zIndex:1,
+          backgroundColor: 'rgb(150 150 150 / 60%)'
+        }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop> 
+      <Header/>
+      <Container sx={{display:"flex", alignItems:"center", flexDirection:"column", justifyContent:"space-between", minHeight:"100vh", width:"100vw" }}>
+        <PageHeader countryName={countryName} numberOfArticles={articles?.length}/>
+        <Box sx={{marginTop:"2rem"}}>
+          {filteredArticles && <div className="page-content">
+            <Articles 
+              articles={filteredArticles}
+              onArticleClick={onClick}
+              loading={loading} 
+              /> 
+          </div>}
+
+        </Box>
+        
+      </Container>
     </div>
   );
 };

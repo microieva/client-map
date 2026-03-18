@@ -1,8 +1,7 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from '../App';
-import CountryPage from '../pages/CountryPage';
-import NotFoundPage from '../pages/NotFoundPage';
+import { NotFoundPage, CountryPage, ArticlePage } from '../pages';
 
 const router = createBrowserRouter([
   {
@@ -13,6 +12,10 @@ const router = createBrowserRouter([
   {
     path: '/country/:countryName',
     element: <CountryPage />,
+  },
+  {
+    path: '/article/:articleId',
+    element: <ArticlePage />,
   },
   {
     path: '/404',

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 
-// Define the structure of the GeoJSON/TopoJSON data
 interface TopoJSONData {
   objects: {
     countries: {
@@ -41,7 +40,7 @@ export const useCountries = (geoUrl: string) => {
 
         const names: string[] = countriesData.geometries
           .map((geo) => geo.properties?.name)
-          .filter((name): name is string => Boolean(name)) // Type guard to filter out undefined
+          .filter((name): name is string => Boolean(name)) 
           .sort((a: string, b: string) => a.localeCompare(b));
         
         setCountries(names);

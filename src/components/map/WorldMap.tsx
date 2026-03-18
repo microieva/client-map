@@ -10,10 +10,11 @@ import { WORLD_MAP_URL, DEFAULT_MAP_STYLES, DEFAULT_MAP_CONFIG } from '../../con
 import { MapStyles, MapConfig, MapInteractions } from '../../types/map';
 import { useMap } from '../../hooks/useMap';
 import CountryTooltip from './CountryTooltip';
+import { CountriesResult } from '../../types/api';
 
 interface WorldMapProps extends MapStyles, MapConfig, MapInteractions {
   className?: string;
-  values?: Object
+  values?: CountriesResult
 }
 
 const WorldMap: React.FC<WorldMapProps> = ({
@@ -103,18 +104,18 @@ const WorldMap: React.FC<WorldMapProps> = ({
         <Geographies geography={WORLD_MAP_URL}>
           {({ geographies }) =>
             geographies.map((geo) => {
-              const isHovered = hoveredGeography?.rsmKey === geo.rsmKey;
-              isHovered;
+              // const isHovered = hoveredGeography?.rsmKey === geo.rsmKey;
+              // isHovered;
               let number = 0;
               const name = geo.properties.name;
-              if (values && (values as any)[name]) { number = (values as any)[name]}
+              if (values && values[name]) { number = values[name].mentions}
 
               return (
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  onMouseEnter={(event) => handleGeographyHover(geo, event)}
-                  onMouseLeave={handleGeographyLeave}
+                  // onMouseEnter={(event) => handleGeographyHover(geo, event)}
+                  // onMouseLeave={handleGeographyLeave}
                   onClick={() => handleGeographyClick(geo)}
                   style={{
                     default: {

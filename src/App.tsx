@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import { WorldMap } from './components/map';
 import './App.css';
-import { Box, AppBar, Chip, Typography, Backdrop, CircularProgress } from '@mui/material';
+import { Typography, Backdrop, CircularProgress, Container } from '@mui/material';
 import { apiClient } from './config/api';
 import { useCountries } from './hooks/useCountries';
 import { WORLD_MAP_URL } from './constants/map';
-import CountryPage from './pages/CountryPage';
-import NotFoundPage from './pages/NotFoundPage';
+import { NotFoundPage, ArticlePage, CountryPage } from './pages';
+import { CountriesData, CountriesResult } from './types/api';
+import Header from './components/layout/Header';
 
 function App() {
   const { countries, loading, error } = useCountries(WORLD_MAP_URL);
-  const [values, setValues] = useState<Object>()
+  const [values, setValues] = useState<CountriesResult | undefined>(undefined);
+  const [ids, setIds] = useState<string[]>([]);
   const navigate = useNavigate();
 
   const handleCountryHover = (countryName: string | null) => {
@@ -20,22 +22,24 @@ function App() {
     }
   };
   const handleCountryClick = (countryName:string)=> {
-        const name = countryName
-            .toLowerCase()
-            .replace(/\s+/g, '-')     
-            .replace(/[^\w-]+/g, ''); 
-          
-          navigate(`/country/${name}`);
+    setIds(values?.[countryName]?.articleIds ?? []);
+
+    const name = countryName
+      .toLowerCase()
+      .replace(/\s+/g, '-')     
+      .replace(/[^\w-]+/g, ''); 
+      
+    navigate(`/country/${name}`);
   }
 
   useEffect(()=> {
     const getValues = async () => {
-      const values = await apiClient.post('/countries', countries);
-      if (values) {
-        return values.data.data
+      const response = await apiClient.post('/countries', countries);
+      if (response) {
+        return response.data.data
       }
     }
-    if (countries) getValues().then(data => setValues(data))
+    if (countries) getValues().then((data: CountriesData) => setValues(data.countries))
   },[countries])
 
   if (error) {
@@ -53,70 +57,70 @@ function App() {
 
   return (
      <Routes>
-       <Route 
+      <Route 
         path="/" 
         element={
           <div className="app">
-            {loading && 
-              <Typography 
-                  component="h3"
-                >
-                  Loading ..
-              </Typography>
-            }
-              <Backdrop
-              sx={{
-                zIndex:1,
-                backgroundColor: 'rgb(150 150 150 / 60%)'
-              }}
-              open={!values && !loading && !error}
-            >
-              <CircularProgress color="inherit" />
-            </Backdrop> 
-            <main className="landing">
-                <Box sx={{ flexGrow: 0 }}>
-                  <AppBar position="static" sx={{flexDirection: "row", p:"5px", gap:1, background:"darkgray"}}>
-                    <Chip size="small" label="categories" title="categories"/>
-                    <Chip  size="small" label="categories" title="categories"/>
-                    <Chip  size="small" label="categories" title="categories"/>
-                    <Chip  size="small" label="categories" title="categories"/>
-                  </AppBar>
-                </Box>
-              
-              {countries && 
-                <section className="map-container">
-                  <WorldMap
-                    defaultFill="#E5E7EB"
-                    defaultStroke="#4B5563"
-                    defaultStrokeWidth={0.5}
-                    hoverFill="#4B5563"
-                    hoverStroke="#4B5563"
-                    hoverStrokeWidth={1}
-                    backgroundColor='transparent'
-                    
-                    // Configure map
-                    // width={1920} // Large base width
-                    // height={1080} // Large base height
-                    // scale={200}
-                    projection="geoEqualEarth"
-                    
-                    // Add interactions
-                    onCountryClick={handleCountryClick}
-                    onCountryHover={handleCountryHover}
-                    
-                    // Optional features
-                    showGraticule={false}
-                    showSphere={false}
+            {loading ? 
+              <Container sx={{width: "100vw", height:"100vh", alignContent:"center"}}>
+                <Typography 
+                    sx={{textAlign:"center"}}
+                    component="h3"
+                  >
+                    Loading ..
+                </Typography>
 
-                    values={values}
-                  />
-                </section>
-              }
-            </main>
+              </Container>
+            :
+            <>
+              <Backdrop
+                sx={{
+                  zIndex:1,
+                  backgroundColor: 'rgb(150 150 150 / 60%)'
+                }}
+                open={!values && !loading && !error}
+              >
+                <CircularProgress color="inherit" />
+              </Backdrop> 
+              <main className="landing">
+                <Header />
+                
+                {countries && 
+                  <section className="map-container">
+                    <WorldMap
+                      defaultFill="#E5E7EB"
+                      defaultStroke="#4B5563"
+                      defaultStrokeWidth={0.5}
+                      hoverFill="#4B5563"
+                      hoverStroke="#4B5563"
+                      hoverStrokeWidth={1}
+                      backgroundColor='transparent'
+                      
+                      // Configure map
+                      // width={1920} // Large base width
+                      // height={1080} // Large base height
+                      // scale={200}
+                      projection="geoEqualEarth"
+                      
+                      // Add interactions
+                      onCountryClick={handleCountryClick}
+                      onCountryHover={handleCountryHover}
+                      
+                      // Optional features
+                      showGraticule={false}
+                      showSphere={false}
+
+                      values={values}
+                    />
+                  </section>
+                }
+              </main>
+            </>}
           </div>}/>
 
-          <Route path="/country/:countryName" element={<CountryPage />} />
-          <Route path="*" element={<NotFoundPage />} />
+      <Route path="/country/:countryName" element={<CountryPage ids={ids}/>} />
+      <Route path="/article/:articleId" element={<ArticlePage />} />
+      <Route path="*" element={<NotFoundPage />} />
      </Routes>
   );
 }
